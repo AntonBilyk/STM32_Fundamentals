@@ -1,0 +1,23 @@
+# macOS
+.DS_Store
+
+# STM32CubeIDE build folders
+Debug/
+Release/
+
+# Build artifacts
+*.o
+*.d 
+*.bin
+*.hex
+*.su
+*.cyclo
+*.list
+*.map
+*.elf
+
+
+# Temporary files
+*.temp 
+*.bak 
+*~
