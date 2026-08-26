@@ -43,10 +43,10 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t data[] = "Hello world\n";
+uint8_t data[] = "Hello world\r\n";
 
 uint8_t number = 123;
-uint8_t numarray[5];
+uint8_t numarray[6];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -104,11 +104,11 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  HAL_UART_Transmit(&huart2, data, 12, 1000);
+	  HAL_UART_Transmit(&huart2, data, 13, 1000);
 	  HAL_Delay(1000);
 
-	  sprintf((char*)numarray, "%d\n", number);
-	  HAL_UART_Transmit(&huart2, numarray, 4, 1000);
+	  sprintf((char*)numarray, "%d\r\n", number);
+	  HAL_UART_Transmit(&huart2, numarray, 5, 1000);
 	  HAL_Delay(1000);
 
 	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
