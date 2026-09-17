@@ -33,9 +33,12 @@ For simulation and hardware-independent testing, selected exercises are adapted 
   - no hardware flow control
   - oversampling by 16
 - Implemented polling-based UART transmission with `HAL_UART_Transmit()`.
+- Implemented interrupt-driven UART transmission with `HAL_UART_Transmit_IT()`.
+- Worked with UART transmission-complete callbacks using `HAL_UART_TxCpltCallback()`.
 - Transmitted text strings over UART.
 - Converted integer values to text with `sprintf()` and transmitted them over UART.
 - Connected USART2 to the Wokwi Serial Monitor for simulation.
+- Used Wokwi Logic Analyzer / VCD output to inspect UART timing and inter-byte behavior.
 
 ## Project Targets
 
@@ -87,14 +90,33 @@ Build output directories such as `Debug/` and `Release/` are intentionally exclu
 
 Selected exercises are reproduced in a separate STM32F103C8T6 project for Wokwi in VSCode.
 
-For the current USART2 test:
+For USART2 testing:
 
 - `PA2` — USART2 TX
 - `PA3` — USART2 RX
 - UART configuration — `115200 8N1`
 - Wokwi Serial Monitor is used to inspect transmitted data.
+- Wokwi Logic Analyzer and VCD captures are used when signal timing needs to be inspected.
 
-The simulation project is intended for validating concepts and program behavior where possible; the NUCLEO-F446RE remains the primary project target.
+### Simulation Limitations
+
+Wokwi is used primarily for functional validation rather than as a cycle-accurate representation of the physical STM32 hardware.
+
+During interrupt-driven UART transmission testing with `HAL_UART_Transmit_IT()`, the expected behavior was approximately two 500 ms main-loop iterations per completed 10240-byte UART transmission at 115200 baud.
+
+In Wokwi, approximately three main-loop iterations per completed transmission were observed instead.
+
+Investigation of the USART2 TX signal using a VCD capture showed that:
+
+- the UART bit timing corresponds to the configured 115200 baud rate;
+- additional idle gaps are present between transmitted UART frames;
+- these gaps increase the overall transfer duration compared with the expected hardware behavior.
+
+Because of this simulator timing difference, interrupt-driven UART timing results from Wokwi are not treated as representative of the physical STM32 target.
+
+Demonstration videos are included only for exercises where Wokwi provides behavior suitable for demonstrating the tested concept.
+
+The NUCLEO-F446RE remains the primary hardware target.
 
 ## Roadmap
 
@@ -106,8 +128,8 @@ This repository will grow as the STM32 beginner course progresses.
 - [x] UART polling transmission
 - [x] String and integer transmission
 - [x] Wokwi UART/LED simulation
+- [x] UART interrupt transmission
 - [ ] UART receive
-- [ ] UART interrupts
 - [ ] UART DMA
 - [ ] ADC
 - [ ] I2C
@@ -119,4 +141,4 @@ This repository will grow as the STM32 beginner course progresses.
 
 **Work in progress.**
 
-The goal of this repository is not only to reproduce course examples, but to understand the underlying STM32 peripherals, clocking, GPIO behavior, communication interfaces, and HAL implementation while keeping the project reproducible in Git.
+The goal of this repository is not only to reproduce course examples, but to understand the underlying STM32 peripherals, clocking, GPIO behavior, communication interfaces, interrupt-driven operation, and HAL implementation while keeping the project reproducible in Git.

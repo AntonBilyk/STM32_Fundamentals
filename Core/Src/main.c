@@ -43,10 +43,15 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t data[] = "Hello world\r\n";
+uint8_t TxData[10240];
+volatile uint8_t isSent = 1;
+volatile uint32_t countendinterrupt = 0;
+volatile uint32_t countloop = 0;
 
-uint8_t number = 123;
-uint8_t numarray[6];
+//uint8_t data[] = "Hello world\r\n";
+//
+//uint8_t number = 123;
+//uint8_t numarray[6];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -54,6 +59,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
 
 /* USER CODE END PFP */
 
@@ -86,14 +92,16 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  for (uint32_t i = 0; i < 10240; i++ )
+  {
+	TxData[i] = i & 0xFF;
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -104,17 +112,29 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-	  HAL_UART_Transmit(&huart2, data, 13, 1000);
-	  HAL_Delay(1000);
+	  if (isSent == 1)
+	  {
+		  isSent = 0;
+		  HAL_UART_Transmit_IT(&huart2, TxData, 10240);
+	  }
 
-	  sprintf((char*)numarray, "%d\r\n", number);
-	  HAL_UART_Transmit(&huart2, numarray, 5, 1000);
-	  HAL_Delay(1000);
-
-	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	  HAL_Delay(500);
-	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-	  HAL_Delay(2000);
+
+	  countloop++;
+
+
+//	  HAL_UART_Transmit(&huart2, data, 13, 1000);
+//	  HAL_Delay(1000);
+//
+//	  sprintf((char*)numarray, "%d\r\n", number);
+//	  HAL_UART_Transmit(&huart2, numarray, 5, 1000);
+//	  HAL_Delay(1000);
+//
+//	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+//	  HAL_Delay(500);
+//	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+//	  HAL_Delay(2000);
   }
   /* USER CODE END 3 */
 }
@@ -237,7 +257,14 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+	if (huart->Instance == USART2)
+	{
+		isSent = 1;
+		countendinterrupt++;
+	}
+}
 /* USER CODE END 4 */
 
 /**
