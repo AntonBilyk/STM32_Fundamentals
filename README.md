@@ -35,7 +35,8 @@ For simulation and hardware-independent testing, selected exercises are adapted 
 - Implemented polling-based UART transmission with `HAL_UART_Transmit()`.
 - Implemented interrupt-driven UART transmission with `HAL_UART_Transmit_IT()`.
 - Worked with UART transmission-complete callbacks using `HAL_UART_TxCpltCallback()`.
-- Implemented UART transmission using DMA with `HAL_UART_Transmit_DMA()`.
+- Implemented UART transmission using DMA in normal mode with `HAL_UART_Transmit_DMA()`.
+- Extended UART DMA transmission to circular mode with runtime buffer updates using `HAL_UART_TxHalfCpltCallback()` and `HAL_UART_TxCpltCallback()`.
 - Configured DMA for USART2 TX on the STM32F446RE target.
 - Transmitted text strings over UART.
 - Converted integer values to text with `sprintf()` and transmitted them over UART.

@@ -44,9 +44,9 @@ UART_HandleTypeDef huart2;
 DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
+int indx = 49; //char '1'
 uint8_t TxData[10240];
-volatile uint8_t isSent = 1;
-volatile uint32_t countendinterrupt = 0;
+volatile uint32_t counttxamount = 0;
 volatile uint32_t countloop = 0;
 
 //uint8_t data[] = "Hello world\r\n";
@@ -61,6 +61,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
+void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart);
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
 
 /* USER CODE END PFP */
@@ -105,6 +106,8 @@ int main(void)
   {
 	TxData[i] = i & 0xFF;
   }
+
+  HAL_UART_Transmit_DMA(&huart2, TxData, 10240);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -114,13 +117,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-	  if (isSent == 1)
-	  {
-		  isSent = 0;
-		  HAL_UART_Transmit_DMA(&huart2, TxData, 10240);
-	  }
-
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 	  HAL_Delay(500);
 
@@ -276,12 +272,35 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart)
+{
+	if (huart->Instance == USART2)
+	{
+		for (uint32_t i = 0; i < 5120; i++)
+		{
+			TxData[i] = indx;
+		}
+		indx++;
+	}
+}
+
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if (huart->Instance == USART2)
 	{
-		isSent = 1;
-		countendinterrupt++;
+		for (uint32_t i = 5120; i < 10240; i++)
+		{
+			TxData[i] = indx;
+		}
+
+		indx++;
+		counttxamount++;
+
+		if (indx >= 60)
+		{
+			HAL_UART_DMAStop(huart);
+		}
+
 	}
 }
 /* USER CODE END 4 */
