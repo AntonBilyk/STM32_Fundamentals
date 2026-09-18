@@ -118,7 +118,7 @@ int main(void)
 	  if (isSent == 1)
 	  {
 		  isSent = 0;
-		  HAL_UART_Transmit_IT(&huart2, TxData, 10240);
+		  HAL_UART_Transmit_DMA(&huart2, TxData, 10240);
 	  }
 
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);

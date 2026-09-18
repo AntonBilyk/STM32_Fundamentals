@@ -35,10 +35,13 @@ For simulation and hardware-independent testing, selected exercises are adapted 
 - Implemented polling-based UART transmission with `HAL_UART_Transmit()`.
 - Implemented interrupt-driven UART transmission with `HAL_UART_Transmit_IT()`.
 - Worked with UART transmission-complete callbacks using `HAL_UART_TxCpltCallback()`.
+- Implemented UART transmission using DMA with `HAL_UART_Transmit_DMA()`.
+- Configured DMA for USART2 TX on the STM32F446RE target.
 - Transmitted text strings over UART.
 - Converted integer values to text with `sprintf()` and transmitted them over UART.
 - Connected USART2 to the Wokwi Serial Monitor for simulation.
 - Used Wokwi Logic Analyzer / VCD output to inspect UART timing and inter-byte behavior.
+
 
 ## Project Targets
 
@@ -102,7 +105,7 @@ For USART2 testing:
 
 Wokwi is used primarily for functional validation rather than as a cycle-accurate representation of the physical STM32 hardware.
 
-During interrupt-driven UART transmission testing with `HAL_UART_Transmit_IT()`, the expected behavior was approximately two 500 ms main-loop iterations per completed 10240-byte UART transmission at 115200 baud.
+Based on the configured baud rate and transfer size, the expected transfer duration was approximately 0.89 seconds, which would normally result in about two 500 ms main-loop iterations per transmission.
 
 In Wokwi, approximately three main-loop iterations per completed transmission were observed instead.
 
@@ -113,6 +116,12 @@ Investigation of the USART2 TX signal using a VCD capture showed that:
 - these gaps increase the overall transfer duration compared with the expected hardware behavior.
 
 Because of this simulator timing difference, interrupt-driven UART timing results from Wokwi are not treated as representative of the physical STM32 target.
+
+The exact internal cause of the inter-byte timing difference in Wokwi was not determined.
+
+DMA-based UART transmission is implemented for the STM32F446RE target, but is not validated in Wokwi because the STM32F103C8T6 Blue Pill simulation does not provide the DMA behavior required for this test.
+
+Therefore, Wokwi is used for GPIO, basic UART, and selected interrupt-driven tests, while DMA behavior requires validation on the physical STM32F446RE target.
 
 Demonstration videos are included only for exercises where Wokwi provides behavior suitable for demonstrating the tested concept.
 
@@ -130,7 +139,7 @@ This repository will grow as the STM32 beginner course progresses.
 - [x] Wokwi UART/LED simulation
 - [x] UART interrupt transmission
 - [ ] UART receive
-- [ ] UART DMA
+- [x] UART DMA
 - [ ] ADC
 - [ ] I2C
 - [ ] SPI
