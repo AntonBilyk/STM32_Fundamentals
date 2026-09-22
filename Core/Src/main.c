@@ -41,29 +41,17 @@
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
-DMA_HandleTypeDef hdma_usart2_tx;
 
 /* USER CODE BEGIN PV */
-int indx = 49; //char '1'
-uint8_t TxData[10240];
-volatile uint32_t counttxamount = 0;
+uint8_t RxData[5];
 volatile uint32_t countloop = 0;
-
-//uint8_t data[] = "Hello world\r\n";
-//
-//uint8_t number = 123;
-//uint8_t numarray[6];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
-void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart);
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart);
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -99,15 +87,8 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  for (uint32_t i = 0; i < 10240; i++ )
-  {
-	TxData[i] = i & 0xFF;
-  }
-
-  HAL_UART_Transmit_DMA(&huart2, TxData, 10240);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -117,23 +98,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	  HAL_UART_Receive(&huart2, RxData, 5, HAL_MAX_DELAY);
+
 	  HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
-	  HAL_Delay(500);
+	  HAL_Delay(1000);
 
 	  countloop++;
-
-
-//	  HAL_UART_Transmit(&huart2, data, 13, 1000);
-//	  HAL_Delay(1000);
-//
-//	  sprintf((char*)numarray, "%d\r\n", number);
-//	  HAL_UART_Transmit(&huart2, numarray, 5, 1000);
-//	  HAL_Delay(1000);
-//
-//	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-//	  HAL_Delay(500);
-//	  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-//	  HAL_Delay(2000);
   }
   /* USER CODE END 3 */
 }
@@ -225,22 +195,6 @@ static void MX_USART2_UART_Init(void)
 }
 
 /**
-  * Enable DMA controller clock
-  */
-static void MX_DMA_Init(void)
-{
-
-  /* DMA controller clock enable */
-  __HAL_RCC_DMA1_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  /* DMA1_Stream6_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Stream6_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Stream6_IRQn);
-
-}
-
-/**
   * @brief GPIO Initialization Function
   * @param None
   * @retval None
@@ -272,37 +226,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_UART_TxHalfCpltCallback(UART_HandleTypeDef *huart)
-{
-	if (huart->Instance == USART2)
-	{
-		for (uint32_t i = 0; i < 5120; i++)
-		{
-			TxData[i] = indx;
-		}
-		indx++;
-	}
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-	if (huart->Instance == USART2)
-	{
-		for (uint32_t i = 5120; i < 10240; i++)
-		{
-			TxData[i] = indx;
-		}
-
-		indx++;
-		counttxamount++;
-
-		if (indx >= 60)
-		{
-			HAL_UART_DMAStop(huart);
-		}
-
-	}
-}
 /* USER CODE END 4 */
 
 /**

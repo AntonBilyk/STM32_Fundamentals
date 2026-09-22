@@ -4,7 +4,7 @@ A hands-on STM32 embedded systems learning project based on the [ControllersTech
 
 The primary target is the **NUCLEO-F446RE (STM32F446RE)**.
 
-For simulation and hardware-independent testing, selected exercises are adapted to the **STM32F103C8T6 (Blue Pill)** and tested in **Wokwi**.
+Selected earlier exercises were adapted to the **STM32F103C8T6 (Blue Pill)** and tested in **Wokwi** as an auxiliary simulation environment.
 
 ## Current Progress
 
@@ -25,7 +25,7 @@ For simulation and hardware-independent testing, selected exercises are adapted 
 
 ### USART / UART
 
-- Configured **USART2** with:
+- Configured **USART2** on the primary STM32F446RE target with:
   - 115200 baud
   - 8 data bits
   - no parity
@@ -49,7 +49,7 @@ For simulation and hardware-independent testing, selected exercises are adapted 
 | Purpose | Board / MCU | Notes |
 |---|---|---|
 | Primary development target | NUCLEO-F446RE / STM32F446RE | Main CubeMX/CubeIDE project |
-| Simulation target | Blue Pill / STM32F103C8T6 | Used to test selected exercises in Wokwi |
+| Simulation target | Blue Pill / STM32F103C8T6 | Used for selected earlier Wokwi exercises and retained as a reference |
 
 Because the boards are electrically different, the simulation project is adapted where necessary rather than treated as a byte-for-byte copy of the primary project.
 
@@ -92,41 +92,36 @@ Build output directories such as `Debug/` and `Release/` are intentionally exclu
 
 ## Wokwi Testing
 
-Selected exercises are reproduced in a separate STM32F103C8T6 project for Wokwi in VSCode.
+Selected exercises were reproduced in a separate STM32F103C8T6 project for Wokwi in VSCode.
 
 For USART2 testing:
 
 - `PA2` — USART2 TX
 - `PA3` — USART2 RX
-- UART configuration — `115200 8N1`
-- Wokwi Serial Monitor is used to inspect transmitted data.
-- Wokwi Logic Analyzer and VCD captures are used when signal timing needs to be inspected.
+- Wokwi Serial Monitor was used for UART input/output testing.
+- Wokwi Logic Analyzer and VCD captures were used to inspect UART timing and diagnose simulator-specific behavior.
 
 ### Simulation Limitations
 
-Wokwi is used primarily for functional validation rather than as a cycle-accurate representation of the physical STM32 hardware.
+Wokwi was useful for early functional testing of GPIO and basic UART behavior, but several simulator-specific differences were encountered as the exercises became more timing- and peripheral-dependent.
 
-Based on the configured baud rate and transfer size, the expected transfer duration was approximately 0.89 seconds, which would normally result in about two 500 ms main-loop iterations per transmission.
+During interrupt-driven UART transmission testing, the configured baud rate was 115200 and the individual UART bit timing matched this value. However, VCD analysis showed additional idle gaps between transmitted UART frames. These gaps increased the total transfer duration compared with the expected hardware timing.
 
-In Wokwi, approximately three main-loop iterations per completed transmission were observed instead.
+DMA-based UART transmission was implemented for the STM32F446RE target but could not be meaningfully validated in the STM32F103C8T6 Wokwi environment used for this project.
 
-Investigation of the USART2 TX signal using a VCD capture showed that:
+A further limitation was found while testing blocking UART receive. Initial VCD analysis showed that the Wokwi Serial Monitor transmitted the entered `hello` sequence at approximately 9600 baud while USART2 on the simulated STM32 was configured for 115200 baud.
 
-- the UART bit timing corresponds to the configured 115200 baud rate;
-- additional idle gaps are present between transmitted UART frames;
-- these gaps increase the overall transfer duration compared with the expected hardware behavior.
+USART2 was temporarily reconfigured to 9600 baud to eliminate the baud-rate mismatch. VCD analysis then confirmed that the `hello` waveform reached PA3 / USART2_RX with the expected timing, and debugging confirmed that the USART baud-rate configuration was correct.
 
-Because of this simulator timing difference, interrupt-driven UART timing results from Wokwi are not treated as representative of the physical STM32 target.
+Despite this, `HAL_UART_Receive()` did not complete and the received data did not progress through the simulated USART2 receive path.
 
-The exact internal cause of the inter-byte timing difference in Wokwi was not determined.
+This indicates a limitation or defect in the STM32F103 USART2 RX emulation used by Wokwi rather than an application-level baud-rate configuration issue.
 
-DMA-based UART transmission is implemented for the STM32F446RE target, but is not validated in Wokwi because the STM32F103C8T6 Blue Pill simulation does not provide the DMA behavior required for this test.
+Because multiple simulator-specific differences were encountered in UART timing, interrupt-driven transmission behavior, DMA support, Serial Monitor behavior, and USART2 receive emulation, Wokwi is no longer used as a validation environment for new peripheral exercises.
 
-Therefore, Wokwi is used for GPIO, basic UART, and selected interrupt-driven tests, while DMA behavior requires validation on the physical STM32F446RE target.
+Existing Wokwi examples are retained as reference implementations and as a record of the earlier simulation work. Further UART, interrupt, DMA, and other timing-sensitive functionality will be validated on the physical NUCLEO-F446RE target when hardware testing becomes available.
 
-Demonstration videos are included only for exercises where Wokwi provides behavior suitable for demonstrating the tested concept.
-
-The NUCLEO-F446RE remains the primary hardware target.
+The NUCLEO-F446RE remains the primary target of the project.
 
 ## Roadmap
 
