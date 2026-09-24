@@ -40,6 +40,8 @@ Selected earlier exercises were adapted to the **STM32F103C8T6 (Blue Pill)** and
 - Configured DMA for USART2 TX on the STM32F446RE target.
 - Transmitted text strings over UART.
 - Converted integer values to text with `sprintf()` and transmitted them over UART.
+- Implemented interrupt-driven UART reception with `HAL_UART_Receive_IT()`.
+- Implemented reception of variable-length data by receiving one byte at a time and using `'\n'` as a message terminator.
 - Connected USART2 to the Wokwi Serial Monitor for simulation.
 - Used Wokwi Logic Analyzer / VCD output to inspect UART timing and inter-byte behavior.
 
@@ -134,7 +136,7 @@ This repository will grow as the STM32 beginner course progresses.
 - [x] String and integer transmission
 - [x] Wokwi UART/LED simulation
 - [x] UART interrupt transmission
-- [ ] UART receive
+- [x] UART receive
 - [x] UART DMA
 - [ ] ADC
 - [ ] I2C

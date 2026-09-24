@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,7 +44,10 @@
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-uint8_t RxData[5];
+int rx_index = 0;
+uint8_t temp[2];
+uint8_t RxData[20];
+uint8_t FinalData[20];
 volatile uint32_t countloop = 0;
 /* USER CODE END PV */
 
@@ -90,7 +94,7 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UART_Receive_IT(&huart2, RxData, 5);
+  HAL_UART_Receive_IT(&huart2, temp, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -228,8 +232,18 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	// do something with data
-	HAL_UART_Receive_IT(huart, RxData, 5);
+	if (temp[0] == '\n')
+	{
+		memcpy (FinalData, RxData, rx_index);
+		rx_index = 0;
+	}
+	else
+	{
+		memcpy (RxData + rx_index, temp, 1);
+		if (++rx_index >= 20) rx_index = 0;
+	}
+
+	HAL_UART_Receive_IT(huart, temp, 1);
 }
 /* USER CODE END 4 */
 
