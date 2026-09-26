@@ -42,6 +42,16 @@ Selected earlier exercises were adapted to the **STM32F103C8T6 (Blue Pill)** and
 - Converted integer values to text with `sprintf()` and transmitted them over UART.
 - Implemented interrupt-driven UART reception with `HAL_UART_Receive_IT()`.
 - Implemented reception of variable-length data by receiving one byte at a time and using `'\n'` as a message terminator.
+- Implemented variable-length interrupt-driven reception using `HAL_UARTEx_ReceiveToIdle_IT()`.
+- Configured UART4 for communication with an HC-05 Bluetooth module at 115200 baud, 8N1.
+- Implemented bidirectional forwarding between USART2 and UART4:
+  - PC → ST-LINK VCP → USART2 → UART4 → HC-05
+  - HC-05 → UART4 → USART2 → ST-LINK VCP → PC
+  - USART2 and UART4 use separate RX buffers.
+  - `HAL_UARTEx_RxEventCallback()` stores the received size and sets a data-ready flag.
+  - Forwarding is handled in the main loop.
+  - Receive is re-armed after the current buffer has been forwarded.
+- Physical HC-05 communication has not yet been validated.
 - Connected USART2 to the Wokwi Serial Monitor for simulation.
 - Used Wokwi Logic Analyzer / VCD output to inspect UART timing and inter-byte behavior.
 
@@ -138,6 +148,9 @@ This repository will grow as the STM32 beginner course progresses.
 - [x] UART interrupt transmission
 - [x] UART receive
 - [x] UART DMA
+- [x] UART Receive-to-Idle reception
+- [x] USART2 ↔ UART4 bidirectional bridge
+- [ ] HC-05 Bluetooth hardware validation
 - [ ] ADC
 - [ ] I2C
 - [ ] SPI
@@ -147,5 +160,4 @@ This repository will grow as the STM32 beginner course progresses.
 ## Status
 
 **Work in progress.**
-
 The goal of this repository is not only to reproduce course examples, but to understand the underlying STM32 peripherals, clocking, GPIO behavior, communication interfaces, interrupt-driven operation, and HAL implementation while keeping the project reproducible in Git.
