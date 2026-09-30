@@ -47,13 +47,16 @@ UART_HandleTypeDef huart4;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
-volatile uint8_t usart2DataReady = 0;
-volatile uint8_t uart4DataReady = 0;
-volatile uint16_t usart2size;
-volatile uint16_t uart4size;
+// volatile uint8_t usart2DataReady = 0;
+// volatile uint8_t uart4DataReady = 0;
+// volatile uint16_t usart2size;
+// volatile uint16_t uart4size;
 
-uint8_t usart2RxData[64];
-uint8_t uart4RxData[64];
+// uint8_t usart2RxData[64];
+// uint8_t uart4RxData[64];
+
+uint16_t ADC_VAL;
+int value;
 
 volatile uint32_t countloop = 0;
 /* USER CODE END PV */
@@ -65,7 +68,8 @@ static void MX_USART2_UART_Init(void);
 static void MX_UART4_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size);
+//void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size);
+long map(long x, long in_min, long in_max, long out_min, long out_max);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -101,12 +105,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  MX_UART4_Init();
+//  MX_USART2_UART_Init();
+//  MX_UART4_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_UARTEx_ReceiveToIdle_IT(&huart2, usart2RxData, 64);
-  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
+//  HAL_UARTEx_ReceiveToIdle_IT(&huart2, usart2RxData, 64);
+//  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -116,18 +120,24 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		if (usart2DataReady == 1)
-		{
-			usart2DataReady = 0;
-			HAL_UART_Transmit(&huart4, usart2RxData, usart2size, 1000);
-			HAL_UARTEx_ReceiveToIdle_IT(&huart2, usart2RxData, 64);
-		}
-		if (uart4DataReady == 1)
-		{
-			uart4DataReady = 0;
-			HAL_UART_Transmit(&huart2, uart4RxData, uart4size, 1000);
-			HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
-		}
+//		if (usart2DataReady == 1)
+//		{
+//			usart2DataReady = 0;
+//			HAL_UART_Transmit(&huart4, usart2RxData, usart2size, 1000);
+//			HAL_UARTEx_ReceiveToIdle_IT(&huart2, usart2RxData, 64);
+//		}
+//		if (uart4DataReady == 1)
+//		{
+//			uart4DataReady = 0;
+//			HAL_UART_Transmit(&huart2, uart4RxData, uart4size, 1000);
+//			HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
+//		}
+	  HAL_ADC_Start(&hadc1);
+	  HAL_ADC_PollForConversion(&hadc1, 100);
+	  ADC_VAL = HAL_ADC_GetValue(&hadc1);
+	  HAL_ADC_Stop(&hadc1);
+	  value = map(ADC_VAL, 0, 4095, 0, 100);
+	  HAL_Delay(500);
 	  countloop++;
   }
   /* USER CODE END 3 */
@@ -337,20 +347,26 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
-{
-	if (huart->Instance == USART2)
-	{
-		usart2size = size;
-		usart2DataReady = 1;
-	}
-	else if (huart->Instance == UART4)
-	{
-		uart4size = size;
-		uart4DataReady = 1;
-	}
+//void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
+//{
+//	if (huart->Instance == USART2)
+//	{
+//		usart2size = size;
+//		usart2DataReady = 1;
+//	}
+//	else if (huart->Instance == UART4)
+//	{
+//		uart4size = size;
+//		uart4DataReady = 1;
+//	}
+//
+//}
 
+long map(long x, long in_min, long in_max, long out_min, long out_max)
+{
+	return (x - in_min) * (out_max - out_min + 1) / (in_max - in_min + 1) + out_min;
 }
+
 /* USER CODE END 4 */
 
 /**
