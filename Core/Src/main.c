@@ -70,6 +70,7 @@ static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
 //void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size);
 long map(long x, long in_min, long in_max, long out_min, long out_max);
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -111,6 +112,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 //  HAL_UARTEx_ReceiveToIdle_IT(&huart2, usart2RxData, 64);
 //  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
+  HAL_ADC_Start_IT(&hadc1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -132,11 +134,6 @@ int main(void)
 //			HAL_UART_Transmit(&huart2, uart4RxData, uart4size, 1000);
 //			HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
 //		}
-	  HAL_ADC_Start(&hadc1);
-	  HAL_ADC_PollForConversion(&hadc1, 100);
-	  ADC_VAL = HAL_ADC_GetValue(&hadc1);
-	  HAL_ADC_Stop(&hadc1);
-	  value = map(ADC_VAL, 0, 4095, 0, 100);
 	  HAL_Delay(500);
 	  countloop++;
   }
@@ -361,12 +358,19 @@ static void MX_GPIO_Init(void)
 //	}
 //
 //}
-
 long map(long x, long in_min, long in_max, long out_min, long out_max)
 {
 	return (x - in_min) * (out_max - out_min + 1) / (in_max - in_min + 1) + out_min;
 }
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+	if (hadc->Instance == ADC1)
+	{
+		ADC_VAL = HAL_ADC_GetValue(hadc);
+		value = map(ADC_VAL, 0, 4095, 0, 100);
+	}
+}
 /* USER CODE END 4 */
 
 /**
