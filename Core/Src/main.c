@@ -56,8 +56,8 @@ UART_HandleTypeDef huart2;
 // uint8_t usart2RxData[64];
 // uint8_t uart4RxData[64];
 
-uint16_t ADC_VAL;
-int value;
+volatile uint16_t ADC_VAL[5];
+volatile int value;
 
 volatile uint32_t countloop = 0;
 /* USER CODE END PV */
@@ -115,7 +115,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 //  HAL_UARTEx_ReceiveToIdle_IT(&huart2, usart2RxData, 64);
 //  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
-  HAL_ADC_Start_IT(&hadc1);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADC_VAL, 5);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -386,8 +386,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
 	if (hadc->Instance == ADC1)
 	{
-		ADC_VAL = HAL_ADC_GetValue(hadc);
-		value = map(ADC_VAL, 0, 4095, 0, 100);
+		value = map(ADC_VAL[4], 0, 4095, 0, 100);
 	}
 }
 /* USER CODE END 4 */
