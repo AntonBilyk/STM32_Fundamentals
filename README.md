@@ -57,24 +57,16 @@ Selected earlier exercises were adapted to the **STM32F103C8T6 (Blue Pill)** and
 
 ### ADC
 
-- Configured ADC1 for single-channel conversion on the STM32F446RE.
-- Configured ADC1_IN0 on PA0 in analog mode.
-- Used 12-bit ADC resolution with a conversion range of 0–4095.
-- Configured the ADC clock to 15 MHz using the APB2 clock and a /6 ADC prescaler.
-- Configured a single regular conversion with:
-  - software trigger
-  - scan mode disabled
-  - continuous conversion disabled
-  - discontinuous conversion disabled
-  - DMA continuous requests disabled
-  - right-aligned conversion data
-  - 480-cycle sampling time
-- Implemented blocking single-channel ADC polling using:
-  - `HAL_ADC_Start()`
-  - `HAL_ADC_PollForConversion()`
-  - `HAL_ADC_GetValue()`
-  - `HAL_ADC_Stop()`
-- Mapped the 12-bit ADC result from 0–4095 to an integer output range of 0–100.
+- Configured ADC1 for single-channel and multi-channel conversion on the STM32F446RE.
+- Implemented single-channel ADC conversion using:
+  - polling
+  - interrupts
+  - DMA
+- Used `HAL_ADC_Start_IT()` and `HAL_ADC_ConvCpltCallback()` for interrupt-driven conversion.
+- Used `HAL_ADC_Start_DMA()` for DMA-based ADC conversion.
+- Implemented multi-channel ADC scanning with 4 regular conversions using DMA in Normal mode.
+- Stored multi-channel ADC results in a `uint16_t` buffer and manually restarted DMA after transfer completion.
+- Worked with ADC scan mode, conversion sequencing, sampling time, EOC, and DMA transfer configuration.
 
 ## Project Targets
 
@@ -171,14 +163,20 @@ This repository will grow as the STM32 beginner course progresses.
 - [x] UART Receive-to-Idle reception
 - [x] USART2 ↔ UART4 bidirectional bridge for HC-05 Bluetooth module
 - [ ] HC-05 Bluetooth hardware validation
-- [ ] ADC
+- [x] ADC
   - [x] Single-channel polling
-  - [ ] Single-channel interrupt and DMA
-  - [ ] Multiple-channel DMA normal mode
-- [ ] I2C
-- [ ] SPI
-- [ ] Timers and PWM
-- [ ] Sensor and external peripheral interfacing
+  - [x] Single-channel interrupt and DMA
+  - [x] Multiple-channel DMA normal mode
+- [ ] I2C LCD1602 / PCF8574
+- [ ] DS3231 RTC
+- [ ] BMP180
+- [ ] BME280
+- [ ] ST7735 TFT
+- [ ] SD Card using SPI
+- [ ] PWM with and without DMA
+- [ ] WS2812 LED
+- [ ] Passive buzzer
+- [ ] HC-SR04
 
 ## Status
 

@@ -55,10 +55,10 @@ UART_HandleTypeDef huart4;
 // uint8_t usart2RxData[64];
 // uint8_t uart4RxData[64];
 
-volatile uint16_t ADC_VAL[5];
-volatile int value;
+volatile uint16_t ADC_VAL[4];
+volatile int isADCFinished = 0;
+uint32_t countloop = 0;
 
-volatile uint32_t countloop = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,8 +68,6 @@ static void MX_DMA_Init(void);
 static void MX_UART4_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
-//void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size);
-long map(long x, long in_min, long in_max, long out_min, long out_max);
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc);
 /* USER CODE END PFP */
 
@@ -112,7 +110,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
 //  HAL_UARTEx_ReceiveToIdle_IT(&huart2, usart2RxData, 64);
 //  HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADC_VAL, 5);
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADC_VAL, 4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -122,18 +120,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-//		if (usart2DataReady == 1)
-//		{
-//			usart2DataReady = 0;
-//			HAL_UART_Transmit(&huart4, usart2RxData, usart2size, 1000);
-//			HAL_UARTEx_ReceiveToIdle_IT(&huart2, usart2RxData, 64);
-//		}
-//		if (uart4DataReady == 1)
-//		{
-//			uart4DataReady = 0;
-//			HAL_UART_Transmit(&huart2, uart4RxData, uart4size, 1000);
-//			HAL_UARTEx_ReceiveToIdle_IT(&huart4, uart4RxData, 64);
-//		}
+	 if (isADCFinished == 1)
+	 {
+		 isADCFinished = 0;
+		 HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADC_VAL, 4);
+	 }
 	  HAL_Delay(500);
 	  countloop++;
   }
@@ -354,30 +345,12 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-//void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t size)
-//{
-//	if (huart->Instance == USART2)
-//	{
-//		usart2size = size;
-//		usart2DataReady = 1;
-//	}
-//	else if (huart->Instance == UART4)
-//	{
-//		uart4size = size;
-//		uart4DataReady = 1;
-//	}
-//
-//}
-long map(long x, long in_min, long in_max, long out_min, long out_max)
-{
-	return (x - in_min) * (out_max - out_min + 1) / (in_max - in_min + 1) + out_min;
-}
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
 	if (hadc->Instance == ADC1)
 	{
-		value = map(ADC_VAL[4], 0, 4095, 0, 100);
+		isADCFinished = 1;
 	}
 }
 /* USER CODE END 4 */
